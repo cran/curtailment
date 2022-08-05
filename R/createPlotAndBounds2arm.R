@@ -1,16 +1,18 @@
-createPlotAndBounds <- function(des, des.input, rownum, xmax, ymax){
+createPlotAndBounds2arm <- function(des, des.input, rownum, xmax, ymax){
   m <- Sm <- decision <- analysis <- NULL
   rownum <- as.numeric(rownum)
-  des <- as.data.frame(t(des[rownum, ]))
-  coef.list <- findCoeffs(n=des$n, p0 = des.input$p0, p1 = des.input$p1)
-  matt <- findCPmatrix(n=des$n, r=des$r, Csize=des$C, p0=des.input$p0, p1=des.input$p1, minstop=des.input$minstop) # uncurtailed matrix
-  findo <- findDesignOCs(n=des$n, r = des$r, C=des$C, thetaF = des$thetaF, thetaE = des$thetaE, p1 = des.input$p1, p0 = des.input$p0, alpha = des.input$alpha, power = des.input$power,
-                         return.tps = TRUE, coeffs = coef.list$coeffs, coeffs.p0 = coef.list$coeffs.p0, mat=matt, minstop=des$eff.minstop)
-  tp.success <- findo$tp[findo$tp$success=="Success", ]
-  # Order by Sm (though this should already be the case):
-  tp.success <- tp.success[order(tp.success$Sm),]
-  tp.success.unneeded <- tp.success[duplicated(tp.success$m), ]
-  tp.fail <- findo$tp[findo$tp$success=="Fail", ]
+  des <- des[rownum, , drop=FALSE]
+  initial.stop.bounds <- findBounds(des=des,
+                              des.input=des.input)
+  initial.stop.bounds <- data.frame(t(initial.stop.bounds))
+  initial.stop.bounds <- cbind(as.numeric(rownames(initial.stop.bounds)), initial.stop.bounds)
+  names(initial.stop.bounds) <- c("m", "fail", "success")
+  tp.fail.components <- apply(initial.stop.bounds[!is.infinite(initial.stop.bounds$fail),], 1, function(x) data.frame(0:x["fail"], rep(x["m"], length(0:x["fail"]))))
+  tp.fail <- do.call(rbind, tp.fail.components)
+  names(tp.fail) <- c("Sm", "m")
+  tp.success.components <- apply(initial.stop.bounds[!is.infinite(initial.stop.bounds$success),], 1, function(x) data.frame(x["success"]:x["m"], rep(x["m"], length(x["success"]:x["m"]))))
+  tp.success <- do.call(rbind, tp.success.components)
+  names(tp.success) <- c("Sm", "m")
 
   coords <- expand.grid(0:des$n, 1:des$n)
   diag.df <- data.frame(Sm=as.numeric(coords[,1]),
@@ -39,21 +41,10 @@ createPlotAndBounds <- function(des, des.input, rownum, xmax, ymax){
   #   diag.df$decision[unneeded.success.index] <- NA
   # }
 
-
-  tp.success.unique.m <- tp.success[!duplicated(tp.success$m), ]
-  stop.bounds <- data.frame(m=seq(from=des$C, to=des$n, by=des$C),
-                            success=Inf,
-                            fail=-Inf)
-  stop.bounds$success[match(tp.success.unique.m$m, stop.bounds$m)] <- tp.success.unique.m$Sm
-  stop.bounds$fail[match(tp.fail$m, stop.bounds$m)] <- tp.fail$Sm
-
-  # Actual number of stages:
-  des$stage <- sum(!is.infinite(stop.bounds$success) | !is.infinite(stop.bounds$fail))
-
   # Add shading:
   diag.df.subset <- diag.df[!is.na(diag.df$decision),]
   diag.df.subset$analysis <- "No"
-  stop.index <- diag.df.subset$m %in% unique(findo$tp$m)
+  stop.index <- diag.df.subset$m %in% initial.stop.bounds$m
   diag.df.subset$analysis[stop.index] <- "Yes"
 
   plot.title <- "Stopping boundaries"
@@ -69,13 +60,14 @@ createPlotAndBounds <- function(des, des.input, rownum, xmax, ymax){
     labs(fill="Decision",
          alpha="Analysis",
          x="Number of participants",
-         y="Number of responses",
+         y="Number of responses on treatment + non-responses on control",
          title=plot.title,
          subtitle = plot.subtitle2)+
     coord_cartesian(expand = 0)+
     theme_minimal()
 
-  xbreaks <- seq(from=des$C, to=des$n, by=des$C)
+
+  xbreaks <- seq(from=des.input$block, to=des$n, by=des.input$block)
 
   if(!is.null(xmax)){
     diagram <- diagram +
@@ -88,16 +80,16 @@ createPlotAndBounds <- function(des, des.input, rownum, xmax, ymax){
       expand_limits(y=ymax)
   }
 
-
-
-  #print(diagram)
-
-
-
-    diagram <- diagram +
+  diagram <- diagram +
     scale_x_continuous(breaks=xbreaks)+
     scale_y_continuous(breaks = function(x) unique(floor(pretty(seq(0, (max(x) + 1) * 1.1)))))
-
-    return(list(diagram=diagram,
+  print(diagram)
+  tp.success.unique.m <- tp.success[!duplicated(tp.success$m), ]
+  stop.bounds <- data.frame(m=seq(from=des$block, to=des$n, by=des$block),
+                            success=Inf,
+                            fail=-Inf)
+  stop.bounds$success[match(tp.success.unique.m$m, stop.bounds$m)] <- tp.success.unique.m$Sm
+  stop.bounds$fail[match(tp.fail$m, stop.bounds$m)] <- tp.fail$Sm
+  return(list(diagram=diagram,
               bounds.mat=stop.bounds))
 }

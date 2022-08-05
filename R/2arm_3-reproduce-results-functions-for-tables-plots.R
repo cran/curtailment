@@ -1,5 +1,7 @@
+
+
 ####
-#### These functions are used to run the code that analyses the designs used.
+#### The functions below were used to create tables and plots for published 2-arm paper.
 ####
 
 # library(gridExtra)

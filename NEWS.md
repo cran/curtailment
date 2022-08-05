@@ -1,3 +1,9 @@
+# curtailment 0.2.0
+
+* Added minstop argument across multiple functions, specifying the minimum sample size for which early stopping is permitted.
+
+* Updated the find2stageDesigns function to allow a maximum permitted conditional power.
+
 # curtailment 0.1.1
 
 * Changed the description, which now does not start with the package name.

@@ -103,6 +103,5 @@ drawDiagramGeneric <- function(n,
   diagram <- diagram +
     ggplot2::scale_x_continuous(breaks=xbreaks)+
     ggplot2::scale_y_continuous(breaks = function(x) unique(floor(pretty(seq(0, (max(x) + 1) * 1.1)))))
-  print(diagram)
   return(diagram)
 }

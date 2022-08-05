@@ -49,38 +49,38 @@ createPlotAndBoundsSimon <- function(des, des.input, rownum, xmax=NULL, ymax=NUL
   sub.text2 <- paste("): ", round(des$EssH0, 1), ". ESS(p", sep="")
   sub.text3 <- paste("):", round(des$Ess, 1), sep="")
   plot.subtitle2 <- bquote(.(sub.text1)[0]*.(sub.text2)[1]*.(sub.text3))
-  diagram <- pkgcond::suppress_warnings(ggplot2::ggplot(data=diag.df.subset, mapping = aes(x=m, y=Sm, fill=decision, alpha=analysis))+
-                                          scale_alpha_discrete(range=c(0.5, 1)),
+  diagram <- pkgcond::suppress_warnings(ggplot2::ggplot(data=diag.df.subset, mapping = ggplot2::aes(x=m, y=Sm, fill=decision, alpha=analysis))+
+                                          ggplot2::scale_alpha_discrete(range=c(0.5, 1)),
                                         "Using alpha for a discrete variable is not advised")
   diagram <- diagram +
-    geom_tile(color="white")+
-    labs(fill="Decision",
+    ggplot2::geom_tile(color="white")+
+    ggplot2::labs(fill="Decision",
          alpha="Analysis",
          x="Number of participants",
          y="Number of responses",
          title=plot.title,
          subtitle = plot.subtitle2)+
-    coord_cartesian(expand = 0)+
-    theme_minimal()
+    ggplot2::coord_cartesian(expand = 0)+
+    ggplot2::theme_minimal()
 
   xbreaks <- c(des$n1, des$n)
 
   if(!is.null(xmax)){
     diagram <- diagram +
-      expand_limits(x=xmax)
+      ggplot2::expand_limits(x=xmax)
     xbreaks <- c(xbreaks, xmax)
   }
 
   if(!is.null(ymax)){
     diagram <- diagram +
-      expand_limits(y=ymax)
+      ggplot2::expand_limits(y=ymax)
   }
 
   diagram <- diagram +
-    scale_x_continuous(breaks=xbreaks)+
-    scale_y_continuous(breaks = function(x) unique(floor(pretty(seq(0, (max(x) + 1) * 1.1)))))
+    ggplot2::scale_x_continuous(breaks=xbreaks)+
+    ggplot2::scale_y_continuous(breaks = function(x) unique(floor(pretty(seq(0, (max(x) + 1) * 1.1)))))
 
-  print(diagram)
+  #print(diagram)
 
   stop.bounds <- data.frame(m=c(des$n1, des$n),
                            success=c(Inf, des$r+1),
