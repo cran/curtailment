@@ -1,3 +1,27 @@
+# curtailment 0.2.6
+
+Changed output of find2stageDesigns
+
+# curtailment 0.2.5
+
+* Tidied output of find2stageDesigns
+
+# curtailment 0.2.4
+
+* Fixed bug in simonEfficacy
+
+# curtailment 0.2.3
+
+* Sped up Mander & Thompson design search (command find2stageDesigns)
+
+# curtailment 0.2.2
+
+* Big fix: minstop argument in singlearmDesign
+
+# curtailment 0.2.1
+
+* Bug fixes
+
 # curtailment 0.2.0
 
 * Added minstop argument across multiple functions, specifying the minimum sample size for which early stopping is permitted.

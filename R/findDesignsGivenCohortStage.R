@@ -98,10 +98,12 @@ if(use.stages==TRUE){
 
   ###### Find thetas for each possible {r, N} combn:
   mat.list <- vector("list", nrow(sc.subset))
-  C.vec <- seq(C, nposs.max, by=C) # all possible TPs, ignoring minstop
-  eff.minstop <- C.vec[which.max(C.vec>=minstop)] # minstop must be multiple of C
+
+  sc.subset$eff.minstop <- NA
   for(i in 1:nrow(sc.subset)){
-    mat.list[[i]] <- findCPmatrix(n=sc.subset[i,"n"], r=sc.subset[i,"r"], Csize=sc.subset[i,"C"], p0=p0, p1=p1, minstop=eff.minstop)
+    C.vec <- seq(sc.subset$C[i], nposs.max, by=sc.subset$C[i]) # all possible TPs, ignoring minstop
+    sc.subset$eff.minstop[i] <- C.vec[which.max(C.vec>=minstop)] # minstop must be multiple of C
+    mat.list[[i]] <- findCPmatrix(n=sc.subset[i,"n"], r=sc.subset[i,"r"], Csize=sc.subset[i,"C"], p0=p0, p1=p1, minstop=sc.subset[i,"eff.minstop"])
   }
 
   store.all.thetas <- lapply(mat.list, function(x) {sort(unique(c(x))[unique(c(x)) <= 1])})
@@ -172,10 +174,9 @@ if(!is.na(max.combns) & is.na(maxthetas)){ # Only use max.combns if maxthetas is
       a <- 1
       b <- nrow(thetaFs.current)
       d <- ceiling((b-a)/2)
-
       while((b-a)>1){
         output <- findDesignOCs(n=sc.subset$n[h], r=sc.subset$r[h], C=sc.subset$C[h], thetaF=as.numeric(thetaFs.current[d]), thetaE=all.thetas[i], mat=mat.list[[h]],
-                                   power=power, alpha=alpha, minstop=eff.minstop, coeffs=coeffs, coeffs.p0=coeffs.p0, p0=p0, p1=p1)
+                                   power=power, alpha=alpha, minstop=sc.subset$eff.minstop[h], coeffs=coeffs, coeffs.p0=coeffs.p0, p0=p0, p1=p1)
 
         if(output[4] <= alpha) { # type I error decreases as index (and thetaF) increases. Jump backwards if type I error is smaller than alpha, o/w forwards.
           b <- d
@@ -188,19 +189,19 @@ if(!is.na(max.combns) & is.na(maxthetas)){ # Only use max.combns if maxthetas is
       # Take care of "edge case" where feasible design exists in the first row:
       if(a==1) { # (and also by necessity, b==2)
         output <-  findDesignOCs(n=sc.subset$n[h], r=sc.subset$r[h], C=sc.subset$C[h], thetaF=as.numeric(thetaFs.current[1]), thetaE=all.thetas[i], mat=mat.list[[h]],
-                                    power=power, alpha=alpha, minstop=eff.minstop, coeffs=coeffs, coeffs.p0=coeffs.p0, p0=p0, p1=p1)
+                                    power=power, alpha=alpha, minstop=sc.subset$eff.minstop[h], coeffs=coeffs, coeffs.p0=coeffs.p0, p0=p0, p1=p1)
         if(output[4] <= alpha) b <- 1 # Should we start at the first row or the second?
       }
 
       # We can now proceed moving sequentially from index==b (or cause a break if we wish).
       first.result <-  findDesignOCs(n=sc.subset$n[h], r=sc.subset$r[h], C=sc.subset$C[h], thetaF=as.numeric(thetaFs.current[b]), thetaE=all.thetas[i],
-                                        mat=mat.list[[h]], coeffs.p0=coeffs.p0, coeffs=coeffs, power=power, alpha=alpha, minstop=eff.minstop, p0=p0, p1=p1)
+                                        mat=mat.list[[h]], coeffs.p0=coeffs.p0, coeffs=coeffs, power=power, alpha=alpha, minstop=sc.subset$eff.minstop[h], p0=p0, p1=p1)
           if((first.result[4]!=0 | first.result[4]!=2) ) {
         pwr <- first.result[5]
         while(pwr >= power & b <= rows) # Keep going until power drops below 1-beta, i.e. no more feasible designs, or we reach the end of the data frame.
         {
           h.results[[k]] <-  findDesignOCs(n=sc.subset$n[h], r=sc.subset$r[h], C=sc.subset$C[h], thetaF=as.numeric(thetaFs.current[b]), thetaE=all.thetas[i],
-                                              mat=mat.list[[h]], coeffs.p0=coeffs.p0, coeffs=coeffs, power=power, alpha=alpha, minstop=eff.minstop, p0=p0, p1=p1)
+                                              mat=mat.list[[h]], coeffs.p0=coeffs.p0, coeffs=coeffs, power=power, alpha=alpha, minstop=sc.subset$eff.minstop[h], p0=p0, p1=p1)
           pwr <- h.results[[k]][5] ####
           k <- k+1
           b <- b+1

@@ -52,3 +52,23 @@ output <- singlearmDesign(nmin = 10,
 # Obtain the stopping boundaries and a diagram of the above trial:
 fig <- drawDiagram(output)
 ```
+
+## Future plans
+
+Speed up Mander and Thompson and Simon design searches by reducing the
+number of combinations of n1/n2/r1/r/e1 search over, using Wald’s
+sequential probability ratio test as in the multi-stage/continuous
+functions:
+
+<!-- denom <- log(p1/p0) - log((1-p1)/(1-p0)) -->
+<!-- accept.null <- log((1-power)/(1-alpha)) / denom  + nposs * log((1-p0)/(1-p1))/denom -->
+<!-- accept.null <- floor(accept.null) -->
+<!-- reject.null <- log((power)/alpha) / denom  + nposs * log((1-p0)/(1-p1))/denom -->
+<!-- reject.null <- ceiling(reject.null) -->
+<!-- r.wald <- NULL -->
+<!-- ns.wald <- NULL -->
+<!-- for(i in 1:length(nposs)){ -->
+<!-- r.wald <- c(r.wald, accept.null[i]:reject.null[i]) -->
+<!-- ns.wald <- c(ns.wald, rep(nposs[i], length(accept.null[i]:reject.null[i]))) -->
+<!-- } -->
+<!-- sc.subset <- data.frame(n=ns.wald, r=r.wald) -->

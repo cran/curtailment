@@ -1,5 +1,5 @@
 # Simon's design: No curtailment -- only stopping is at end of S1:
-simonEfficacy <- function(n1, n2, r1, r, e1, p0, p1)
+simonEfficacy_alternative <- function(n1, n2, r1, r, e1, p0, p1)
 {
 
   n <- n1+n2
@@ -75,16 +75,22 @@ simonEfficacy <- function(n1, n2, r1, r, e1, p0, p1)
   output <- rbind(curtail.s1, go)
   colnames(output) <- c("k", "n", "prob", "prob.p0")
 
+  k <- output[, "k"]
+  n.col <- output[, "n"]
+  prob <- output[, "prob"]
+  prob.p0 <- output[, "prob.p0"]
+
   ############## WRAPPING UP THE RESULTS ##############
+
   #output <- cbind(output, rep(0, nrow(output)))
 
-  success <- output[, "k"] > r | ( output[, "n"]==n1 & output[, "k"] > e1)
+  success <- k > r | n.col==n1 & k > e1
 
   # Pr(early termination):
   #PET <- sum(output$prob[output$n < n])
   #PET.p0 <- sum(output$prob.p0[output$n < n])
 
-  power <- sum(output[, "prob"][success==TRUE])
+  power <- sum(prob[success==TRUE])
 
   #output$obsd.p <- output$k/output$n
 
@@ -95,14 +101,14 @@ simonEfficacy <- function(n1, n2, r1, r, e1, p0, p1)
 
   #sample.size <- wtd.quantile(output$n, weights=output$prob, normwt=TRUE, probs=c(0.25, 0.5, 0.75))
   #sample.size.expd <- wtd.mean(output$n, weights=output$prob, normwt=TRUE)
-  sample.size.expd <- sum(output[,"n"]*output[, "prob"])
+  sample.size.expd <- sum(n.col*prob)
 
   #sample.size.p0 <- wtd.quantile(output$n, weights=output$prob.p0, normwt=TRUE, probs=c(0.25, 0.5, 0.75))
   #sample.size.expd.p0 <- wtd.mean(output$n, weights=output$prob.p0, normwt=TRUE)
-  sample.size.expd.p0 <- sum(output[,"n"]*output[, "prob.p0"])
+  sample.size.expd.p0 <- sum(n.col*prob.p0)
 
 
-  alpha <- sum(output[, "prob.p0"][success==TRUE])
+  alpha <- sum(prob.p0[success==TRUE])
 
   #output <- list(output, mean.bias=bias.mean, var.bias=bias.var, sample.size=sample.size, expd.sample.size=sample.size.expd, PET=PET,
   #               sample.size.p0=sample.size.p0, expd.sample.size.p0=sample.size.expd.p0, PET.p0=PET.p0, alpha=alpha, power=power)

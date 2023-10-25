@@ -33,19 +33,19 @@
 #'  benefit=TRUE)
 #'  }
 #' @references
-#' \doi{10.1016/j.cct.2010.07.008}{A.P. Mander, S.G. Thompson,
+#' \doi{10.1016/j.cct.2010.07.008}A.P. Mander, S.G. Thompson,
 #' Two-stage designs optimal under the alternative hypothesis for phase II cancer clinical trials,
 #' Contemporary Clinical Trials,
 #' Volume 31, Issue 6,
 #' 2010,
-#' Pages 572-578}
+#' Pages 572-578
 #'
-#' \doi{10.1016/0197-2456(89)90015-9}{Richard Simon,
+#' \doi{10.1016/0197-2456(89)90015-9}Richard Simon,
 #' Optimal two-stage designs for phase II clinical trials,
 #' Controlled Clinical Trials,
 #' Volume 10, Issue 1,
 #' 1989,
-#' Pages 1-10}
+#' Pages 1-10
 #' @export
 find2stageDesigns <- function(nmin, nmax, p0, p1, alpha, power, maxthetaF=NA, benefit=FALSE)
 {
@@ -95,5 +95,6 @@ if(!is.na(maxthetaF)){
   simon.output <- list(input=simon.input,
                        all.des=simon.df)
   class(simon.output) <- append(class(simon.output), "curtailment_simon")
+  #UseMethod("print", simon.output)
   return(simon.output)
 }
